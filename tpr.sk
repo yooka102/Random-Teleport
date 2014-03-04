@@ -1,0 +1,210 @@
+#------------------------------------------------------#
+# Licencja: Random Teleport by Yooka                   #
+#------------------------------------------------------#
+#  Nie zezwalam na:                                    #
+#- Zarabianie na skrypcie                              #
+#- Przerabianie/modyfikowanie                          #
+#- Wykorzystywanie kodu skryptu w swoich skryptach     #
+#- Udostepnianiu skryptu innym bez zgody autora        #
+#- Usuwanie tresci zawierajacych iformacje autora      #
+#- Podszywanie sie pod autora                          #
+# Zezwalam na:                                         #
+# - Modyfikowanie wiadomosci skryptu na wlasne         #
+#   potrzeby                                           #
+#------------------------------------------------------#
+# Mylnie odczytana licencja nie zwalnia z              #
+# przestrzegania jej                                   #
+#------------------------------------------------------#
+options:
+	wersja.tpr: 0.3
+
+
+aliases:
+	blocktpr = 1, 2, 3, 4, 12, 13, 49, 7, 8, 5, 18, 172, 24, 9
+	przycisktpr = 77, 70, 69
+
+on load:
+	set {tpr.min.x} to value "tpr.minx" pulled from "%script%"
+	set {tpr.max.x} to value "tpr.maxx" pulled from "%script%"
+	set {tpr.min.z} to value "tpr.miny" pulled from "%script%"
+	set {tpr.max.z} to value "tpr.maxy" pulled from "%script%"
+	set {msg.tpr} to coloured value "msg.tpr" pulled from "%script%"
+	set {msg.ups} to coloured value "msg.ups" pulled from "%script%"
+	set {msg.noperm} to coloured value "msg.noperm" pulled from "%script%"
+	set {msg.tpr.save} to coloured value "msg.tprsave" pulled from "%script%"
+	set {msg.tpr.zapis} to coloured value "msg.zapisany" pulled from "%script%"
+	set {msg.tpr.nodel} to coloured value "msg.nodel" pulled from "%script%"
+	set {msg.tpr.noblock} to coloured value "msg.noblock" pulled from "%script%"
+	set {msg.signcreate} to coloured value "msg.signcreate" pulled from "%script%"
+	set {msg.tpr.del} to coloured value "msg.del" pulled from "%script%"
+	set {msg.tpr.nosave} to coloured value "msg.nosave" pulled from "%script%"
+	send "[Random Teleport]: &7Wlaczono skrypt w wersji: &c{@wersja.tpr}&7." to console
+
+on script unload:
+	send "[Random Teleport]: &7Wylaczono skrypt w wersji: &c{@wersja.tpr}&7." to console
+
+command /tpr [<text>] [<text>]:
+	trigger:
+		if arg 1 is not set:
+			if player doesn't have permission "%{tpr.prefixperm}%.use":
+				send "%{msg.noperm}%"
+				stop
+			set {_random.x} to a random integer between {tpr.min.x} parsed as number and {tpr.max.x} parsed as number
+			set {_random.z} to a random integer between {tpr.min.z} parsed as number and {tpr.max.z} parsed as number
+			set {_random.y} to 0 
+			set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+			loop blocks above the block at location of {_random.pos}:
+				if block at location of loop-block is blocktpr:
+					if block above the block at location of loop-block is air or water:
+						if block 1 above the block at location of loop-block is air:
+							if block 2 above the block at location of loop-block is air:
+								teleport player to block above the block at location of loop-block
+								send "%{msg.tpr}% %location of block above the block at location of loop-block%"
+								stop
+			send "%{msg.ups}%"
+			stop
+		if arg 1 is "reload" or "r":
+			if player doesn't have permission "%{tpr.prefixperm}%.reload":
+				send "%{msg.noperm}%"
+				stop
+			execute player command "sk reload %script%"
+			send "&cPrzeladowano"
+			stop
+		if arg 1 is "set" or "zapisz":
+			if player doesn't have permission "%{tpr.prefixperm}%.set":
+				send "%{msg.noperm}%"
+				stop
+			if targeted block is not przycisktpr:
+				send "%{msg.tpr.noblock}%"
+				stop
+			loop {przyciski.tpr::*}:
+				if loop-value is location of targeted block:
+					send "%{msg.tpr.zapis}%"
+					stop
+			add location of targeted block to {przyciski.tpr::*}
+			set {tpr.%location of targeted block%} to true
+			send "%{msg.tpr.save}%"
+			stop
+		if arg 1 is "usun" or "del":
+			if player doesn't have permission "%{tpr.prefixperm}%.del":
+				send "%{msg.noperm}%"
+				stop
+			if targeted block is not przycisktpr:
+				send "%{msg.tpr.nodel}%"
+				stop
+			loop {przyciski.tpr::*}:
+				if loop-value is location of targeted block:
+					remove location of targeted block from {przyciski.tpr::*}
+					delete {tpr.%location of targeted block%}
+					send "%{msg.tpr.del}%"
+					stop
+			send "%{msg.tpr.nosave}%"
+			stop
+		if arg 1 is "list" or "lista":
+			if player doesn't have permission "%{tpr.prefixperm}%.lista":
+				send "%{msg.noperm}%"
+				stop
+			send "&2&LLista Przyciskow:"
+			loop {przyciski.tpr::*}:
+				send "%loop-index%. %loop-value%"
+			stop
+
+on sign change:
+	line 1 is "[teleport]" or "[Teleport]" or "[tp]" or "[Tp]":
+		player doesn't have permission "%{tpr.prefixperm}%.signs":
+			send "%{msg.noperm}%"
+			cancel event
+			stop
+		send "%{msg.signcreate}% &1[Teleport]"
+		set line 1 to "&1[Teleport]"
+		stop
+
+on right click on sign:
+	line 1 of clicked block is "&1[Teleport]":
+		line 2 of clicked block is "losowy":
+			player doesn't have permission "%{tpr.prefixperm}%.signs.use":
+				send "%{msg.noperm}%"
+				cancel event
+				stop
+			set {_random.x} to a random integer between {tpr.min.x} parsed as number and {tpr.max.x} parsed as number
+			set {_random.z} to a random integer between {tpr.min.z} parsed as number and {tpr.max.z} parsed as number
+			set {_random.y} to 0 
+			set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+			loop blocks above the block at location of {_random.pos}:
+				if block at location of loop-block is blocktpr:
+					if block above the block at location of loop-block is air or water:
+						if block 1 above the block at location of loop-block is air:
+							if block 2 above the block at location of loop-block is air:
+								teleport player to block above the block at location of loop-block
+								send "%{msg.tpr}% %location of block above the block at location of loop-block%"
+								stop
+			send "%{msg.ups}%"
+			stop
+
+on right click on button or lever:
+	if block behind event-block is sponge:
+		player doesn't have permission "%{tpr.prefixperm}%.button.use":
+			send "%{msg.noperm}%"
+			cancel event
+			stop
+		set {_random.x} to a random integer between {tpr.min.x} parsed as number and {tpr.max.x} parsed as number
+		set {_random.z} to a random integer between {tpr.min.z} parsed as number and {tpr.max.z} parsed as number
+		set {_random.y} to 0 
+		set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+		loop blocks above the block at location of {_random.pos}:
+			if block at location of loop-block is blocktpr:
+				if block above the block at location of loop-block is air or water:
+					if block 1 above the block at location of loop-block is air:
+						if block 2 above the block at location of loop-block is air:
+							teleport player to block above the block at location of loop-block
+							send "%{msg.tpr}% %location of block above the block at location of loop-block%"
+							stop
+		send "%{msg.ups}%"
+		stop
+	if {tpr.%location of event-block%} is true:
+		player doesn't have permission "%{tpr.prefixperm}%.button.use":
+			send "%{msg.noperm}%"
+			cancel event
+			stop
+		set {_random.x} to a random integer between {tpr.min.x} parsed as number and {tpr.max.x} parsed as number
+		set {_random.z} to a random integer between {tpr.min.z} parsed as number and {tpr.max.z} parsed as number
+		set {_random.y} to 0 
+		set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+		loop blocks above the block at location of {_random.pos}:
+			if block at location of loop-block is blocktpr:
+				if block above the block at location of loop-block is air or water:
+					if block 1 above the block at location of loop-block is air:
+						if block 2 above the block at location of loop-block is air:
+							teleport player to block above the block at location of loop-block
+							send "%{msg.tpr}% %location of block above the block at location of loop-block%"
+							stop
+		send "%{msg.ups}%"
+		stop
+
+on pressure plate:
+	if {tpr.%location of event-block%} is true:
+		player doesn't have permission "%{tpr.prefixperm}%.button.use":
+			send "%{msg.noperm}%"
+			cancel event
+			stop
+		set {_random.x} to a random integer between {tpr.min.x} parsed as number and {tpr.max.x} parsed as number
+		set {_random.z} to a random integer between {tpr.min.z} parsed as number and {tpr.max.z} parsed as number
+		set {_random.y} to 0 
+		set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+		loop blocks above the block at location of {_random.pos}:
+			if block at location of loop-block is blocktpr:
+				if block above the block at location of loop-block is air or water:
+					if block 1 above the block at location of loop-block is air:
+						if block 2 above the block at location of loop-block is air:
+							teleport player to block above the block at location of loop-block
+							send "%{msg.tpr}% %location of block above the block at location of loop-block%"
+							stop
+		send "%{msg.ups}%"
+		stop
+
+on place of button or lever:
+	if block behind event-block is sponge:
+		player doesn't have permission "%{tpr.prefixperm}%.create.tpr":
+			send "%{msg.noperm}%"
+			cancel event
+			stop

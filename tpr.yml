@@ -1,0 +1,20 @@
+tpr:
+  minx: -1001
+  maxx: 1001
+  miny: -1001
+  maxy: 1001
+
+  prefixperm: tpr
+
+
+msg:
+  noperm: <red>Brak Uprawnien
+  signcreate: <dark green>Utworzono tabliczke
+  tpr: <dark green><bold>Zostales przniesiony do<gold>
+  ups: <red><bold>Ups cos poszlo nie tak sproboj ponownie
+  tprsave: <dark green><bold>Zapisano losowy teleport
+  noblock: <red><bold>Wskazany blok nie moze byc zapisany
+  zapisany: <red><bold>Ten przycisk jest juz zapisany
+  nodel: <red><bold>Wskazany blok nie moze byc usuniety
+  del: <dark green><bold>Usunieto zapisana pozycje
+  nosave: <red><bold>Wskazany przycis nie jest zapisany 
