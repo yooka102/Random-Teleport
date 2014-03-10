@@ -6,12 +6,10 @@ tpr:
 
   prefixperm: tpr
 
-
 msg:
   noperm: <red>Brak Uprawnien
   signcreate: <dark green>Utworzono tabliczke
   tpr: <dark green><bold>Zostales przniesiony do<gold>
-  ups: <red><bold>Ups cos poszlo nie tak sproboj ponownie
   tprsave: <dark green><bold>Zapisano losowy teleport
   noblock: <red><bold>Wskazany blok nie moze byc zapisany
   zapisany: <red><bold>Ten przycisk jest juz zapisany

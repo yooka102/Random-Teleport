@@ -16,7 +16,7 @@
 # przestrzegania jej                                   #
 #------------------------------------------------------#
 options:
-	wersja.tpr: 0.3
+	wersja.tpr: 0.4
 
 
 aliases:
@@ -24,12 +24,12 @@ aliases:
 	przycisktpr = 77, 70, 69
 
 on load:
-	set {tpr.min.x} to value "tpr.minx" pulled from "%script%"
-	set {tpr.max.x} to value "tpr.maxx" pulled from "%script%"
-	set {tpr.min.z} to value "tpr.miny" pulled from "%script%"
-	set {tpr.max.z} to value "tpr.maxy" pulled from "%script%"
+
+	set {tpr.min.x} to value "tpr.minx" pulled from "%script%" parsed as number
+	set {tpr.max.x} to value "tpr.maxx" pulled from "%script%" parsed as number
+	set {tpr.min.z} to value "tpr.miny" pulled from "%script%" parsed as number
+	set {tpr.max.z} to value "tpr.maxy" pulled from "%script%" parsed as number
 	set {msg.tpr} to coloured value "msg.tpr" pulled from "%script%"
-	set {msg.ups} to coloured value "msg.ups" pulled from "%script%"
 	set {msg.noperm} to coloured value "msg.noperm" pulled from "%script%"
 	set {msg.tpr.save} to coloured value "msg.tprsave" pulled from "%script%"
 	set {msg.tpr.zapis} to coloured value "msg.zapisany" pulled from "%script%"
@@ -49,20 +49,23 @@ command /tpr [<text>] [<text>]:
 			if player doesn't have permission "%{tpr.prefixperm}%.use":
 				send "%{msg.noperm}%"
 				stop
-			set {_random.x} to a random integer between {tpr.min.x} parsed as number and {tpr.max.x} parsed as number
-			set {_random.z} to a random integer between {tpr.min.z} parsed as number and {tpr.max.z} parsed as number
-			set {_random.y} to 0 
-			set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
-			loop blocks above the block at location of {_random.pos}:
-				if block at location of loop-block is blocktpr:
-					if block above the block at location of loop-block is air or water:
-						if block 1 above the block at location of loop-block is air:
-							if block 2 above the block at location of loop-block is air:
-								teleport player to block above the block at location of loop-block
-								send "%{msg.tpr}% %location of block above the block at location of loop-block%"
-								stop
-			send "%{msg.ups}%"
-			stop
+			set {radnom.%name of player%} to true
+			while {radnom.%name of player%} is true:
+				set {_random.x} to a random integer between {tpr.min.x} and {tpr.max.x}
+				set {_random.z} to a random integer between {tpr.min.z} and {tpr.max.z}
+				set {_random.y} to 0 
+				set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+				loop blocks above the block at location of {_random.pos}:
+					if block at location of loop-block is blocktpr:
+						if block above the block at location of loop-block is air or water:
+							if block 1 above the block at location of loop-block is air:
+								if block 2 above the block at location of loop-block is air:
+									teleport player to block above the block at location of loop-block
+									send "%{msg.tpr}% %location of block above the block at location of loop-block%"
+									add location of block above the block at location of loop-block to {tpr.pos::*}
+									set {radnom.%name of player%} to false
+									stop
+
 		if arg 1 is "reload" or "r":
 			if player doesn't have permission "%{tpr.prefixperm}%.reload":
 				send "%{msg.noperm}%"
@@ -108,6 +111,10 @@ command /tpr [<text>] [<text>]:
 			loop {przyciski.tpr::*}:
 				send "%loop-index%. %loop-value%"
 			stop
+		if arg 1 is "autor":
+			send "&6Wersja: &7{@wersja.tpr}"
+			send "&6Autor: &7Marcin Klekner&c(Yooka)"
+			send "&6URL: &7http://meee.pl/"
 
 on sign change:
 	line 1 is "[teleport]" or "[Teleport]" or "[tp]" or "[Tp]":
@@ -126,8 +133,33 @@ on right click on sign:
 				send "%{msg.noperm}%"
 				cancel event
 				stop
-			set {_random.x} to a random integer between {tpr.min.x} parsed as number and {tpr.max.x} parsed as number
-			set {_random.z} to a random integer between {tpr.min.z} parsed as number and {tpr.max.z} parsed as number
+			set {radnom.%name of player%} to true
+			while {radnom.%name of player%} is true:
+				set {_random.x} to a random integer between {tpr.min.x} and {tpr.max.x}
+				set {_random.z} to a random integer between {tpr.min.z} and {tpr.max.z}
+				set {_random.y} to 0 
+				set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+				loop blocks above the block at location of {_random.pos}:
+					if block at location of loop-block is blocktpr:
+						if block above the block at location of loop-block is air or water:
+							if block 1 above the block at location of loop-block is air:
+								if block 2 above the block at location of loop-block is air:
+									teleport player to block above the block at location of loop-block
+									send "%{msg.tpr}% %location of block above the block at location of loop-block%"
+									set {radnom.%name of player%} to false
+									stop
+
+
+on right click on button or lever:
+	if block behind event-block is sponge:
+		player doesn't have permission "%{tpr.prefixperm}%.button.use":
+			send "%{msg.noperm}%"
+			cancel event
+			stop
+		set {radnom.%name of player%} to true
+		while {radnom.%name of player%} is true:
+			set {_random.x} to a random integer between {tpr.min.x} and {tpr.max.x}
+			set {_random.z} to a random integer between {tpr.min.z} and {tpr.max.z}
 			set {_random.y} to 0 
 			set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
 			loop blocks above the block at location of {_random.pos}:
@@ -137,49 +169,29 @@ on right click on sign:
 							if block 2 above the block at location of loop-block is air:
 								teleport player to block above the block at location of loop-block
 								send "%{msg.tpr}% %location of block above the block at location of loop-block%"
+								set {radnom.%name of player%} to false
 								stop
-			send "%{msg.ups}%"
-			stop
 
-on right click on button or lever:
-	if block behind event-block is sponge:
-		player doesn't have permission "%{tpr.prefixperm}%.button.use":
-			send "%{msg.noperm}%"
-			cancel event
-			stop
-		set {_random.x} to a random integer between {tpr.min.x} parsed as number and {tpr.max.x} parsed as number
-		set {_random.z} to a random integer between {tpr.min.z} parsed as number and {tpr.max.z} parsed as number
-		set {_random.y} to 0 
-		set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
-		loop blocks above the block at location of {_random.pos}:
-			if block at location of loop-block is blocktpr:
-				if block above the block at location of loop-block is air or water:
-					if block 1 above the block at location of loop-block is air:
-						if block 2 above the block at location of loop-block is air:
-							teleport player to block above the block at location of loop-block
-							send "%{msg.tpr}% %location of block above the block at location of loop-block%"
-							stop
-		send "%{msg.ups}%"
-		stop
 	if {tpr.%location of event-block%} is true:
 		player doesn't have permission "%{tpr.prefixperm}%.button.use":
 			send "%{msg.noperm}%"
 			cancel event
 			stop
-		set {_random.x} to a random integer between {tpr.min.x} parsed as number and {tpr.max.x} parsed as number
-		set {_random.z} to a random integer between {tpr.min.z} parsed as number and {tpr.max.z} parsed as number
-		set {_random.y} to 0 
-		set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
-		loop blocks above the block at location of {_random.pos}:
-			if block at location of loop-block is blocktpr:
-				if block above the block at location of loop-block is air or water:
-					if block 1 above the block at location of loop-block is air:
-						if block 2 above the block at location of loop-block is air:
-							teleport player to block above the block at location of loop-block
-							send "%{msg.tpr}% %location of block above the block at location of loop-block%"
-							stop
-		send "%{msg.ups}%"
-		stop
+		set {radnom.%name of player%} to true
+		while {radnom.%name of player%} is true:
+			set {_random.x} to a random integer between {tpr.min.x} and {tpr.max.x}
+			set {_random.z} to a random integer between {tpr.min.z} and {tpr.max.z}
+			set {_random.y} to 0 
+			set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+			loop blocks above the block at location of {_random.pos}:
+				if block at location of loop-block is blocktpr:
+					if block above the block at location of loop-block is air or water:
+						if block 1 above the block at location of loop-block is air:
+							if block 2 above the block at location of loop-block is air:
+								teleport player to block above the block at location of loop-block
+								send "%{msg.tpr}% %location of block above the block at location of loop-block%"
+								set {radnom.%name of player%} to false
+								stop
 
 on pressure plate:
 	if {tpr.%location of event-block%} is true:
@@ -187,20 +199,22 @@ on pressure plate:
 			send "%{msg.noperm}%"
 			cancel event
 			stop
-		set {_random.x} to a random integer between {tpr.min.x} parsed as number and {tpr.max.x} parsed as number
-		set {_random.z} to a random integer between {tpr.min.z} parsed as number and {tpr.max.z} parsed as number
-		set {_random.y} to 0 
-		set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
-		loop blocks above the block at location of {_random.pos}:
-			if block at location of loop-block is blocktpr:
-				if block above the block at location of loop-block is air or water:
-					if block 1 above the block at location of loop-block is air:
-						if block 2 above the block at location of loop-block is air:
-							teleport player to block above the block at location of loop-block
-							send "%{msg.tpr}% %location of block above the block at location of loop-block%"
-							stop
-		send "%{msg.ups}%"
-		stop
+		set {radnom.%name of player%} to true
+		while {radnom.%name of player%} is true:
+			set {_random.x} to a random integer between {tpr.min.x} and {tpr.max.x}
+			set {_random.z} to a random integer between {tpr.min.z} and {tpr.max.z}
+			set {_random.y} to 0 
+			set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+			loop blocks above the block at location of {_random.pos}:
+				if block at location of loop-block is blocktpr:
+					if block above the block at location of loop-block is air or water:
+						if block 1 above the block at location of loop-block is air:
+							if block 2 above the block at location of loop-block is air:
+								teleport player to block above the block at location of loop-block
+								send "%{msg.tpr}% %location of block above the block at location of loop-block%"
+								set {radnom.%name of player%} to false
+								stop
+
 
 on place of button or lever:
 	if block behind event-block is sponge:
@@ -208,3 +222,4 @@ on place of button or lever:
 			send "%{msg.noperm}%"
 			cancel event
 			stop
+
