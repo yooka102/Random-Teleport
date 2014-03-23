@@ -5,6 +5,7 @@ tpr:
   maxy: 1001
 
   prefixperm: tpr
+  wersja: 0.5
 
 msg:
   noperm: <red>Brak Uprawnien

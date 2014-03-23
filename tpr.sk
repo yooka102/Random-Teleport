@@ -15,8 +15,7 @@
 # Mylnie odczytana licencja nie zwalnia z              #
 # przestrzegania jej                                   #
 #------------------------------------------------------#
-options:
-	wersja.tpr: 0.4
+
 
 
 aliases:
@@ -24,24 +23,24 @@ aliases:
 	przycisktpr = 77, 70, 69
 
 on load:
+	set {tpr.wersja} to value "tpr.wersja" get of "plugins/Skript/scripts/tpr.yml" parsed as number
+	set {tpr.min.x} to value "tpr.minx" get of "plugins/Skript/scripts/tpr.yml" parsed as number
+	set {tpr.max.x} to value "tpr.maxx" get of "plugins/Skript/scripts/tpr.yml" parsed as number
+	set {tpr.min.z} to value "tpr.miny" get of "plugins/Skript/scripts/tpr.yml" parsed as number
+	set {tpr.max.z} to value "tpr.maxy" get of "plugins/Skript/scripts/tpr.yml" parsed as number
+	set {msg.tpr} to coloured value "msg.tpr" get of "plugins/Skript/scripts/tpr.yml"
+	set {msg.noperm} to coloured value "msg.noperm" get of "plugins/Skript/scripts/tpr.yml"
+	set {msg.tpr.save} to coloured value "msg.tprsave" get of "plugins/Skript/scripts/tpr.yml"
+	set {msg.tpr.zapis} to coloured value "msg.zapisany" get of "plugins/Skript/scripts/tpr.yml"
+	set {msg.tpr.nodel} to coloured value "msg.nodel" get of "plugins/Skript/scripts/tpr.yml"
+	set {msg.tpr.noblock} to coloured value "msg.noblock" get of "plugins/Skript/scripts/tpr.yml"
+	set {msg.signcreate} to coloured value "msg.signcreate" get of "plugins/Skript/scripts/tpr.yml"
+	set {msg.tpr.del} to coloured value "msg.del" get of "plugins/Skript/scripts/tpr.yml"
+	set {msg.tpr.nosave} to coloured value "msg.nosave" get of "plugins/Skript/scripts/tpr.yml"
+	send "[Random Teleport]: &7Wlaczono skrypt w wersji: &c%{tpr.wersja}%&7." to console
 
-	set {tpr.min.x} to value "tpr.minx" pulled from "%script%" parsed as number
-	set {tpr.max.x} to value "tpr.maxx" pulled from "%script%" parsed as number
-	set {tpr.min.z} to value "tpr.miny" pulled from "%script%" parsed as number
-	set {tpr.max.z} to value "tpr.maxy" pulled from "%script%" parsed as number
-	set {msg.tpr} to coloured value "msg.tpr" pulled from "%script%"
-	set {msg.noperm} to coloured value "msg.noperm" pulled from "%script%"
-	set {msg.tpr.save} to coloured value "msg.tprsave" pulled from "%script%"
-	set {msg.tpr.zapis} to coloured value "msg.zapisany" pulled from "%script%"
-	set {msg.tpr.nodel} to coloured value "msg.nodel" pulled from "%script%"
-	set {msg.tpr.noblock} to coloured value "msg.noblock" pulled from "%script%"
-	set {msg.signcreate} to coloured value "msg.signcreate" pulled from "%script%"
-	set {msg.tpr.del} to coloured value "msg.del" pulled from "%script%"
-	set {msg.tpr.nosave} to coloured value "msg.nosave" pulled from "%script%"
-	send "[Random Teleport]: &7Wlaczono skrypt w wersji: &c{@wersja.tpr}&7." to console
-
-on script unload:
-	send "[Random Teleport]: &7Wylaczono skrypt w wersji: &c{@wersja.tpr}&7." to console
+on unload:
+	send "[Random Teleport]: &7Wylaczono skrypt w wersji: &c%{tpr.wersja}%&7." to console
 
 command /tpr [<text>] [<text>]:
 	trigger:
@@ -70,7 +69,7 @@ command /tpr [<text>] [<text>]:
 			if player doesn't have permission "%{tpr.prefixperm}%.reload":
 				send "%{msg.noperm}%"
 				stop
-			execute player command "sk reload %script%"
+			execute player command "sk reload tpr"
 			send "&cPrzeladowano"
 			stop
 		if arg 1 is "set" or "zapisz":
@@ -112,7 +111,7 @@ command /tpr [<text>] [<text>]:
 				send "%loop-index%. %loop-value%"
 			stop
 		if arg 1 is "autor":
-			send "&6Wersja: &7{@wersja.tpr}"
+			send "&6Wersja: &7%{tpr.wersja}%"
 			send "&6Autor: &7Marcin Klekner&c(Yooka)"
 			send "&6URL: &7http://meee.pl/"
 
