@@ -23,202 +23,337 @@ aliases:
 	przycisktpr = 77, 70, 69
 
 on load:
-	set {tpr.wersja} to value "tpr.wersja" get of "plugins/Skript/scripts/tpr.yml" parsed as number
-	set {tpr.min.x} to value "tpr.minx" get of "plugins/Skript/scripts/tpr.yml" parsed as number
-	set {tpr.max.x} to value "tpr.maxx" get of "plugins/Skript/scripts/tpr.yml" parsed as number
-	set {tpr.min.z} to value "tpr.miny" get of "plugins/Skript/scripts/tpr.yml" parsed as number
-	set {tpr.max.z} to value "tpr.maxy" get of "plugins/Skript/scripts/tpr.yml" parsed as number
-	set {msg.tpr} to coloured value "msg.tpr" get of "plugins/Skript/scripts/tpr.yml"
-	set {msg.noperm} to coloured value "msg.noperm" get of "plugins/Skript/scripts/tpr.yml"
-	set {msg.tpr.save} to coloured value "msg.tprsave" get of "plugins/Skript/scripts/tpr.yml"
-	set {msg.tpr.zapis} to coloured value "msg.zapisany" get of "plugins/Skript/scripts/tpr.yml"
-	set {msg.tpr.nodel} to coloured value "msg.nodel" get of "plugins/Skript/scripts/tpr.yml"
-	set {msg.tpr.noblock} to coloured value "msg.noblock" get of "plugins/Skript/scripts/tpr.yml"
-	set {msg.signcreate} to coloured value "msg.signcreate" get of "plugins/Skript/scripts/tpr.yml"
-	set {msg.tpr.del} to coloured value "msg.del" get of "plugins/Skript/scripts/tpr.yml"
-	set {msg.tpr.nosave} to coloured value "msg.nosave" get of "plugins/Skript/scripts/tpr.yml"
-	send "[Random Teleport]: &7Wlaczono skrypt w wersji: &c%{tpr.wersja}%&7." to console
+	if file in "plugins/Skript/scripts/%script%.yml" is not exists:
+		send "&cNie znaleziono pliku %script%.yml. &3&LPOBIERANIE ..." to console
+		download from "http://file.meee.pl/skript/tpr/tpr.yml" to file "plugins/Skript/scripts/%script%.yml"
+		send "&2&LPobrano plik &6%script%.yml " to console
+
+	set {tpr.api.msg::*} to configuration section "msg" get of "plugins/Skript/scripts/%script%.yml"
+	loop {tpr.api.msg::*}:
+		set {tpr.msg::%loop-value%} to coloured value "msg.%loop-value%" get of "plugins/Skript/scripts/%script%.yml"
+	set {tpr.conf::wersja-sk} to "1.0"
+	set {tpr.api.conf::*} to configuration section "tpr" get of "plugins/Skript/scripts/%script%.yml"
+	loop {tpr.api.conf::*}:
+		set {tpr.conf::%loop-value%} to value "tpr.%loop-value%" get of "plugins/Skript/scripts/%script%.yml"
+	if {tpr.info} is not set:
+		set {_info} to result of connect to "http://static.meee.pl/info-tpr.php?info=%server ip%:%server port%-%bukkit version%-%now%"
+		set {tpr.info} to "%server ip%:%server port%"
+	if {tpr.info} is not "%server ip%:%server port%":
+		set {_info} to result of connect to "http://static.meee.pl/info-tpr.php?info=%server ip%:%server port%-%bukkit version%-%now%"
+		set {tpr.info} to "%server ip%:%server port%"
+	set {tpr.blockbiome::*} to value list "blockbiome" get of "plugins/Skript/scripts/%script%.yml"
+	set {_chcekverstion} to result of connect to "http://file.meee.pl/skript/tpr/"
+	send "[Random Teleport]: &7Wlaczono skrypt w wersji: &c%{tpr.conf::wersja-sk}%&7." to console
+	if {_chcekverstion} is not {tpr.conf::wersja-sk}:
+		send "&cWykryto nowa wersje &6Random Teleport - &c%{_chcekverstion}%" to console
+		send "&2Aby zaktualizowac skrypt wpisz &6/tpr update" to console
+
+	
 
 on unload:
-	send "[Random Teleport]: &7Wylaczono skrypt w wersji: &c%{tpr.wersja}%&7." to console
+	delete {tpr.api.conf::*}
+	delete {tpr.api.msg::*}
+	delete {tpr.conf::*}
+	delete {tpr.msg::*}
+	send "[Random Teleport]: &7Wylaczono skrypt" to console
+
+on join:
+	if player has permission "%{tpr.conf::prefixperm}%.update":
+		set {_chcekverstion} to result of connect to "http://file.meee.pl/skript/tpr/"
+		if {_chcekverstion} is not {tpr.conf::wersja-sk}:
+			send "&cWykryto nowa wersje &6Random Teleport - &c%{_chcekverstion}%"
+			send "&2Aby zaktualizować skrypt wpisz &6/tpr update"
+				
+
 
 command /tpr [<text>] [<text>]:
 	trigger:
 		if arg 1 is not set:
-			if player doesn't have permission "%{tpr.prefixperm}%.use":
-				send "%{msg.noperm}%"
+			if player doesn't have permission "%{tpr.conf::prefixperm}%.use":
+				send "%{tpr.msg::noperm}%"
 				stop
-			set {radnom.%name of player%} to true
-			while {radnom.%name of player%} is true:
-				set {_random.x} to a random integer between {tpr.min.x} and {tpr.max.x}
-				set {_random.z} to a random integer between {tpr.min.z} and {tpr.max.z}
-				set {_random.y} to 0 
+			set {_min.x} to {tpr.conf::minx} parsed as number
+			set {_max.x} to {tpr.conf::maxx} parsed as number
+			set {_min.y} to {tpr.conf::miny} parsed as number
+			set {_max.y} to {tpr.conf::maxy} parsed as number
+			set {radnom.%player%} to true
+			while {radnom.%player%} is true:
+				set {_random.x} to a random integer between {_min.x} and {_max.x}
+				set {_random.z} to a random integer between {_min.y} and {_max.y}
+				set {_random.y} to 0
 				set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
-				loop blocks above the block at location of {_random.pos}:
-					if block at location of loop-block is blocktpr:
-						if block above the block at location of loop-block is air or water:
-							if block 1 above the block at location of loop-block is air:
-								if block 2 above the block at location of loop-block is air:
-									teleport player to block above the block at location of loop-block
-									send "%{msg.tpr}% %location of block above the block at location of loop-block%"
-									add location of block above the block at location of loop-block to {tpr.pos::*}
-									set {radnom.%name of player%} to false
-									stop
+				set {_allowchcek} to true
+				if {tpr.conf::checkbiome} is "true":
+					loop {tpr.blockbiome::*}:
+						if "%biome at {_random.pos}%" is "%loop-value%":
+							set {_allowchcek} to false
+				if {_allowchcek} is true:		
+					loop blocks above the block at location of {_random.pos}:
+						if block at location of loop-block is blocktpr:
+							if block above the block at location of loop-block is air or water:
+								if block 1 above the block at location of loop-block is air:
+									if block 2 above the block at location of loop-block is air:
+										add location of block above the block at location of loop-block to {tpr.pos::*}
+										set {radnom.%player%} to false
+										set {_pos} to block above the block at location of loop-block
 
+			teleport player to {_pos}
+			stop
+			
 		if arg 1 is "reload" or "r":
-			if player doesn't have permission "%{tpr.prefixperm}%.reload":
-				send "%{msg.noperm}%"
+			if player doesn't have permission "%{tpr.conf::prefixperm}%.reload":
+				send "%{tpr.msg::noperm}%"
 				stop
-			execute player command "sk reload tpr"
-			send "&cPrzeladowano"
+			execute console command "sk reload %script%"
+			send {tpr.msg::reload}
 			stop
 		if arg 1 is "set" or "zapisz":
-			if player doesn't have permission "%{tpr.prefixperm}%.set":
-				send "%{msg.noperm}%"
+			if player doesn't have permission "%{tpr.conf::prefixperm}%.set":
+				send "%{tpr.msg::noperm}%"
 				stop
 			if targeted block is not przycisktpr:
-				send "%{msg.tpr.noblock}%"
+				send {tpr.msg::noblock}
 				stop
 			loop {przyciski.tpr::*}:
 				if loop-value is location of targeted block:
-					send "%{msg.tpr.zapis}%"
+					send {tpr.msg::zapisany}
 					stop
 			add location of targeted block to {przyciski.tpr::*}
 			set {tpr.%location of targeted block%} to true
-			send "%{msg.tpr.save}%"
+			send {tpr.msg::tprsave}
 			stop
 		if arg 1 is "usun" or "del":
-			if player doesn't have permission "%{tpr.prefixperm}%.del":
-				send "%{msg.noperm}%"
+			if player doesn't have permission "%{tpr.conf::prefixperm}%.del":
+				send "%{tpr.msg::noperm}%"
 				stop
 			if targeted block is not przycisktpr:
-				send "%{msg.tpr.nodel}%"
+				send {tpr.msg::noblock}
 				stop
 			loop {przyciski.tpr::*}:
 				if loop-value is location of targeted block:
 					remove location of targeted block from {przyciski.tpr::*}
 					delete {tpr.%location of targeted block%}
-					send "%{msg.tpr.del}%"
+					send {tpr.msg::del}
 					stop
-			send "%{msg.tpr.nosave}%"
+			send {tpr.msg::nosave}
 			stop
-		if arg 1 is "list" or "lista":
-			if player doesn't have permission "%{tpr.prefixperm}%.lista":
-				send "%{msg.noperm}%"
+		if arg 1 is "update":
+			if player doesn't have permission "%{tpr.conf::prefixperm}%.lista":
+				send "%{tpr.msg::noperm}%"
 				stop
-			send "&2&LLista Przyciskow:"
+			set {_chcekverstion} to result of connect to "http://file.meee.pl/skript/tpr/"
+			if {_chcekverstion} is {tpr.conf::wersja-sk}:
+				send "&cPosiadasz aktualną wersję skryptu"
+				stop
+			if folder in "plugins/Skript/scripts/_temp" is not exists:
+				create folder "plugins/Skript/scripts/_temp"
+			download from "http://file.meee.pl/skript/tpr/update.yml" to file "plugins/Skript/scripts/_temp/update.yml"
+			clear {update.file::*}
+			set {tpr.update::*} to value list "file" get of "plugins/Skript/scripts/_temp/update.yml"
+			loop {tpr.update::*}:
+				set {_s::*} to loop-value split at "/"
+				loop {_s::*}:
+					if "%loop-value-2%" contain ".sk" or ".yml":
+						set {_file} to loop-value-2
+						add {_file} to {update.file::*}
+						download from "http://file.meee.pl/skript/tpr/%{_file}%" to file "plugins/Skript/scripts/%{_file}%"
+
+			loop {update.file::*}:
+				if "%loop-value%" contain ".sk":
+					set {_nazwa} to "%loop-value%"
+					replace all ".sk" with "" in {_nazwa}
+					execute console command "sk reload %{_nazwa}%"
+					wait 10 tick
+
+			send "&3&LZaktualizowano skrypt ;)"
+			df "plugins/Skript/scripts/_temp/update.yml"
+
+		if arg 1 is "list" or "lista":
+			if player doesn't have permission "%{tpr.conf::prefixperm}%.lista":
+				send "%{tpr.msg::noperm}%"
+				stop
+			if size of {przyciski.tpr::*} is smaller than 1:
+				send {tpr.msg::emptylsprz}
+				stop
+			send "%{tpr.msg::lsprz}%:"
 			loop {przyciski.tpr::*}:
 				send "%loop-index%. %loop-value%"
 			stop
 		if arg 1 is "autor":
-			send "&6Wersja: &7%{tpr.wersja}%"
+			send "&6Wersja: &7%{tpr.conf::wersja-sk}%"
 			send "&6Autor: &7Marcin Klekner&c(Yooka)"
 			send "&6URL: &7http://meee.pl/"
+		if arg 1 is "infobiome":
+			if player doesn't have permission "%{tpr.conf::prefixperm}%.infobiome":
+				send "%{tpr.msg::noperm}%"
+				stop
+			send "&3Biom: &f%biome at player%"
+			stop
+		if arg 1 is "blad":
+			if player doesn't have permission "%{tpr.conf::prefixperm}%.bug":
+				send "%{tpr.msg::noperm}%"
+				stop
+			if arg 2 is not set:
+				send "&c&LZglaszanie bledu:"
+				send "&6Aby zglosic blad wpisz &3/tpr blad <wiadomosc>"
+				stop
+			set {_blad} to arg 2
+			replace all " " with "_" in {_blad}
+			set {_msg} to coloured result of connect to "http://static.meee.pl/blad.php?info=%server ip%:%server port%-%{_blad}%"
+			send "%{_msg}%"
 
 on sign change:
 	line 1 is "[teleport]" or "[Teleport]" or "[tp]" or "[Tp]":
-		player doesn't have permission "%{tpr.prefixperm}%.signs":
-			send "%{msg.noperm}%"
+		player doesn't have permission "%{tpr.conf::prefixperm}%.signs":
+			send "%{tpr.msg::noperm}%"
 			cancel event
 			stop
-		send "%{msg.signcreate}% &1[Teleport]"
+		send {tpr.msg::signcreate}
 		set line 1 to "&1[Teleport]"
 		stop
 
 on right click on sign:
 	line 1 of clicked block is "&1[Teleport]":
 		line 2 of clicked block is "losowy":
-			player doesn't have permission "%{tpr.prefixperm}%.signs.use":
-				send "%{msg.noperm}%"
+			player doesn't have permission "%{tpr.conf::prefixperm}%.signs.use":
+				send "%{tpr.msg::noperm}%"
 				cancel event
 				stop
-			set {radnom.%name of player%} to true
-			while {radnom.%name of player%} is true:
-				set {_random.x} to a random integer between {tpr.min.x} and {tpr.max.x}
-				set {_random.z} to a random integer between {tpr.min.z} and {tpr.max.z}
-				set {_random.y} to 0 
+			set {_min.x} to {tpr.conf::minx} parsed as number
+			set {_max.x} to {tpr.conf::maxx} parsed as number
+			set {_min.y} to {tpr.conf::miny} parsed as number
+			set {_max.y} to {tpr.conf::maxy} parsed as number
+			set {radnom.%player%} to true
+			while {radnom.%player%} is true:
+				set {_random.x} to a random integer between {_min.x} and {_max.x}
+				set {_random.z} to a random integer between {_min.y} and {_max.y}
+				set {_random.y} to 0
 				set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+				set {_allowchcek} to true
+				if {tpr.conf::checkbiome} is "true":
+					loop {tpr.blockbiome::*}:
+						if "%biome at {_random.pos}%" is "%loop-value%":
+							set {_allowchcek} to false
+				if {_allowchcek} is true:		
+					loop blocks above the block at location of {_random.pos}:
+						if block at location of loop-block is blocktpr:
+							if block above the block at location of loop-block is air or water:
+								if block 1 above the block at location of loop-block is air:
+									if block 2 above the block at location of loop-block is air:
+										add location of block above the block at location of loop-block to {tpr.pos::*}
+										set {radnom.%player%} to false
+										set {_pos} to block above the block at location of loop-block
+
+			teleport player to {_pos}
+			stop
+
+
+on right click on button or lever:
+	if block behind event-block is sponge:
+		player doesn't have permission "%{tpr.conf::prefixperm}%.button.use":
+			send "%{tpr.msg::noperm}%"
+			cancel event
+			stop
+		set {_min.x} to {tpr.conf::minx} parsed as number
+		set {_max.x} to {tpr.conf::maxx} parsed as number
+		set {_min.y} to {tpr.conf::miny} parsed as number
+		set {_max.y} to {tpr.conf::maxy} parsed as number
+		set {radnom.%player%} to true
+		while {radnom.%player%} is true:
+			set {_random.x} to a random integer between {_min.x} and {_max.x}
+			set {_random.z} to a random integer between {_min.y} and {_max.y}
+			set {_random.y} to 0
+			set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
+			set {_allowchcek} to true
+			if {tpr.conf::checkbiome} is "true":
+				loop {tpr.blockbiome::*}:
+					if "%biome at {_random.pos}%" is "%loop-value%":
+						set {_allowchcek} to false
+			if {_allowchcek} is true:		
 				loop blocks above the block at location of {_random.pos}:
 					if block at location of loop-block is blocktpr:
 						if block above the block at location of loop-block is air or water:
 							if block 1 above the block at location of loop-block is air:
 								if block 2 above the block at location of loop-block is air:
-									teleport player to block above the block at location of loop-block
-									send "%{msg.tpr}% %location of block above the block at location of loop-block%"
-									set {radnom.%name of player%} to false
-									stop
+									add location of block above the block at location of loop-block to {tpr.pos::*}
+									set {radnom.%player%} to false
+									set {_pos} to block above the block at location of loop-block
 
-
-on right click on button or lever:
-	if block behind event-block is sponge:
-		player doesn't have permission "%{tpr.prefixperm}%.button.use":
-			send "%{msg.noperm}%"
-			cancel event
-			stop
-		set {radnom.%name of player%} to true
-		while {radnom.%name of player%} is true:
-			set {_random.x} to a random integer between {tpr.min.x} and {tpr.max.x}
-			set {_random.z} to a random integer between {tpr.min.z} and {tpr.max.z}
-			set {_random.y} to 0 
-			set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
-			loop blocks above the block at location of {_random.pos}:
-				if block at location of loop-block is blocktpr:
-					if block above the block at location of loop-block is air or water:
-						if block 1 above the block at location of loop-block is air:
-							if block 2 above the block at location of loop-block is air:
-								teleport player to block above the block at location of loop-block
-								send "%{msg.tpr}% %location of block above the block at location of loop-block%"
-								set {radnom.%name of player%} to false
-								stop
+		teleport player to {_pos}
+		stop
 
 	if {tpr.%location of event-block%} is true:
-		player doesn't have permission "%{tpr.prefixperm}%.button.use":
-			send "%{msg.noperm}%"
+		player doesn't have permission "%{tpr.conf::prefixperm}%.button.use":
+			send "%{tpr.msg::noperm}%"
 			cancel event
 			stop
-		set {radnom.%name of player%} to true
-		while {radnom.%name of player%} is true:
-			set {_random.x} to a random integer between {tpr.min.x} and {tpr.max.x}
-			set {_random.z} to a random integer between {tpr.min.z} and {tpr.max.z}
-			set {_random.y} to 0 
+		set {_min.x} to {tpr.conf::minx} parsed as number
+		set {_max.x} to {tpr.conf::maxx} parsed as number
+		set {_min.y} to {tpr.conf::miny} parsed as number
+		set {_max.y} to {tpr.conf::maxy} parsed as number
+		set {radnom.%player%} to true
+		while {radnom.%player%} is true:
+			set {_random.x} to a random integer between {_min.x} and {_max.x}
+			set {_random.z} to a random integer between {_min.y} and {_max.y}
+			set {_random.y} to 0
 			set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
-			loop blocks above the block at location of {_random.pos}:
-				if block at location of loop-block is blocktpr:
-					if block above the block at location of loop-block is air or water:
-						if block 1 above the block at location of loop-block is air:
-							if block 2 above the block at location of loop-block is air:
-								teleport player to block above the block at location of loop-block
-								send "%{msg.tpr}% %location of block above the block at location of loop-block%"
-								set {radnom.%name of player%} to false
-								stop
+			set {_allowchcek} to true
+			if {tpr.conf::checkbiome} is "true":
+				loop {tpr.blockbiome::*}:
+					if "%biome at {_random.pos}%" is "%loop-value%":
+						set {_allowchcek} to false
+			if {_allowchcek} is true:		
+				loop blocks above the block at location of {_random.pos}:
+					if block at location of loop-block is blocktpr:
+						if block above the block at location of loop-block is air or water:
+							if block 1 above the block at location of loop-block is air:
+								if block 2 above the block at location of loop-block is air:
+									add location of block above the block at location of loop-block to {tpr.pos::*}
+									set {radnom.%player%} to false
+									set {_pos} to block above the block at location of loop-block
+
+		teleport player to {_pos}
+		stop
 
 on pressure plate:
 	if {tpr.%location of event-block%} is true:
-		player doesn't have permission "%{tpr.prefixperm}%.button.use":
-			send "%{msg.noperm}%"
+		player doesn't have permission "%{tpr.conf::prefixperm}%.button.use":
+			send "%{tpr.msg::noperm}%"
 			cancel event
 			stop
-		set {radnom.%name of player%} to true
-		while {radnom.%name of player%} is true:
-			set {_random.x} to a random integer between {tpr.min.x} and {tpr.max.x}
-			set {_random.z} to a random integer between {tpr.min.z} and {tpr.max.z}
-			set {_random.y} to 0 
+		set {_min.x} to {tpr.conf::minx} parsed as number
+		set {_max.x} to {tpr.conf::maxx} parsed as number
+		set {_min.y} to {tpr.conf::miny} parsed as number
+		set {_max.y} to {tpr.conf::maxy} parsed as number
+		set {radnom.%player%} to true
+		while {radnom.%player%} is true:
+			set {_random.x} to a random integer between {_min.x} and {_max.x}
+			set {_random.z} to a random integer between {_min.y} and {_max.y}
+			set {_random.y} to 0
 			set {_random.pos} to location at {_random.x}, {_random.y}, {_random.z}
-			loop blocks above the block at location of {_random.pos}:
-				if block at location of loop-block is blocktpr:
-					if block above the block at location of loop-block is air or water:
-						if block 1 above the block at location of loop-block is air:
-							if block 2 above the block at location of loop-block is air:
-								teleport player to block above the block at location of loop-block
-								send "%{msg.tpr}% %location of block above the block at location of loop-block%"
-								set {radnom.%name of player%} to false
-								stop
+			set {_allowchcek} to true
+			if {tpr.conf::checkbiome} is "true":
+				loop {tpr.blockbiome::*}:
+					if "%biome at {_random.pos}%" is "%loop-value%":
+						set {_allowchcek} to false
+			if {_allowchcek} is true:		
+				loop blocks above the block at location of {_random.pos}:
+					if block at location of loop-block is blocktpr:
+						if block above the block at location of loop-block is air or water:
+							if block 1 above the block at location of loop-block is air:
+								if block 2 above the block at location of loop-block is air:
+									add location of block above the block at location of loop-block to {tpr.pos::*}
+									set {radnom.%player%} to false
+									set {_pos} to block above the block at location of loop-block
+
+		teleport player to {_pos}
+		stop
 
 
 on place of button or lever:
 	if block behind event-block is sponge:
-		player doesn't have permission "%{tpr.prefixperm}%.create.tpr":
-			send "%{msg.noperm}%"
+		player doesn't have permission "%{tpr.conf::prefixperm}%.create.tpr":
+			send "%{tpr.msg::noperm}%"
 			cancel event
 			stop
 

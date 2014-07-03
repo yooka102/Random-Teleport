@@ -1,19 +1,26 @@
 tpr:
-  minx: -1001
-  maxx: 1001
-  miny: -1001
-  maxy: 1001
+  minx: '-1001'
+  maxx: '1001'
+  miny: '-1001'
+  maxy: '1001'
+  prefixperm: 'tpr'
+  wersja: '1.0'
+  checkbiome: 'true'
 
-  prefixperm: tpr
-  wersja: 0.5
+blockbiome:
+ - 'deep ocean'
+ - 'ocean'
 
 msg:
-  noperm: <red>Brak Uprawnien
-  signcreate: <dark green>Utworzono tabliczke
-  tpr: <dark green><bold>Zostales przniesiony do<gold>
-  tprsave: <dark green><bold>Zapisano losowy teleport
-  noblock: <red><bold>Wskazany blok nie moze byc zapisany
-  zapisany: <red><bold>Ten przycisk jest juz zapisany
-  nodel: <red><bold>Wskazany blok nie moze byc usuniety
-  del: <dark green><bold>Usunieto zapisana pozycje
-  nosave: <red><bold>Wskazany przycis nie jest zapisany 
+  noperm: '&c&LBrak Uprawnien'
+  signcreate: '&2Utworzono tabliczke'
+  tpr: '&2Zostales przniesiony do'
+  tprsave: '&2Zapisano losowy teleport'
+  noblock: '&c&LWskazany blok nie moze byc zapisany'
+  zapisany: '&c&LTen przycisk jest juz zapisany'
+  nodel: '&cWskazany blok nie moze byc usuniety'
+  del: '&2&LUsunieto zapisana pozycje'
+  nosave: '&2Wskazany przycis nie jest zapisany'
+  reload: '&3&LPrzeladowano'
+  lsprz: '&2&LLista Przyciskow'
+  emptylsprz: '&c&LLista przycikow jest pusta'
