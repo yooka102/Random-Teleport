@@ -31,7 +31,7 @@ on load:
 	set {tpr.api.msg::*} to configuration section "msg" get of "plugins/Skript/scripts/%script%.yml"
 	loop {tpr.api.msg::*}:
 		set {tpr.msg::%loop-value%} to coloured value "msg.%loop-value%" get of "plugins/Skript/scripts/%script%.yml"
-	set {tpr.conf::wersja-sk} to "1.0"
+	set {skript.aip.version::tpr} to "1.0"
 	set {tpr.api.conf::*} to configuration section "tpr" get of "plugins/Skript/scripts/%script%.yml"
 	loop {tpr.api.conf::*}:
 		set {tpr.conf::%loop-value%} to value "tpr.%loop-value%" get of "plugins/Skript/scripts/%script%.yml"
@@ -43,8 +43,8 @@ on load:
 		set {tpr.info} to "%server ip%:%server port%"
 	set {tpr.blockbiome::*} to value list "blockbiome" get of "plugins/Skript/scripts/%script%.yml"
 	set {_chcekverstion} to result of connect to "http://file.meee.pl/skript/tpr/"
-	send "[Random Teleport]: &7Wlaczono skrypt w wersji: &c%{tpr.conf::wersja-sk}%&7." to console
-	if {_chcekverstion} is not {tpr.conf::wersja-sk}:
+	send "[Random Teleport]: &7Wlaczono skrypt w wersji: &c%{skript.aip.version::tpr}%&7." to console
+	if {_chcekverstion} is not {skript.aip.version::tpr}:
 		send "&cWykryto nowa wersje &6Random Teleport - &c%{_chcekverstion}%" to console
 		send "&2Aby zaktualizowac skrypt wpisz &6/tpr update" to console
 
@@ -60,7 +60,7 @@ on unload:
 on join:
 	if player has permission "%{tpr.conf::prefixperm}%.update":
 		set {_chcekverstion} to result of connect to "http://file.meee.pl/skript/tpr/"
-		if {_chcekverstion} is not {tpr.conf::wersja-sk}:
+		if {_chcekverstion} is not {skript.aip.version::tpr}:
 			send "&cWykryto nowa wersje &6Random Teleport - &c%{_chcekverstion}%"
 			send "&2Aby zaktualizować skrypt wpisz &6/tpr update"
 				
@@ -142,7 +142,7 @@ command /tpr [<text>] [<text>]:
 				send "%{tpr.msg::noperm}%"
 				stop
 			set {_chcekverstion} to result of connect to "http://file.meee.pl/skript/tpr/"
-			if {_chcekverstion} is {tpr.conf::wersja-sk}:
+			if {_chcekverstion} is {skript.aip.version::tpr}:
 				send "&cPosiadasz aktualną wersję skryptu"
 				stop
 			if folder in "plugins/Skript/scripts/_temp" is not exists:
@@ -180,7 +180,7 @@ command /tpr [<text>] [<text>]:
 				send "%loop-index%. %loop-value%"
 			stop
 		if arg 1 is "autor":
-			send "&6Wersja: &7%{tpr.conf::wersja-sk}%"
+			send "&6Wersja: &7%{skript.aip.version::tpr}%"
 			send "&6Autor: &7Marcin Klekner&c(Yooka)"
 			send "&6URL: &7http://meee.pl/"
 		if arg 1 is "infobiome":
