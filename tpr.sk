@@ -27,7 +27,10 @@ on load:
 		send "&cNie znaleziono pliku %script%.yml. &3&LPOBIERANIE ..." to console
 		download from "http://file.meee.pl/skript/tpr/tpr.yml" to file "plugins/Skript/scripts/%script%.yml"
 		send "&2&LPobrano plik &6%script%.yml " to console
-
+	if file in "plugins/Skript/scripts/dbsk.sk" is not exists:
+		download from "http://file.meee.pl/skript/dbsk/dbsk.sk" to file "plugins/Skript/scripts/dbsk.sk"
+		wait 10 tick
+		execute console command "sk reload dbsk"
 	set {tpr.api.msg::*} to configuration section "msg" get of "plugins/Skript/scripts/%script%.yml"
 	loop {tpr.api.msg::*}:
 		set {tpr.msg::%loop-value%} to coloured value "msg.%loop-value%" get of "plugins/Skript/scripts/%script%.yml"
