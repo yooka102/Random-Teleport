@@ -34,7 +34,7 @@ on load:
 	set {tpr.api.msg::*} to configuration section "msg" get of "plugins/Skript/scripts/%script%.yml"
 	loop {tpr.api.msg::*}:
 		set {tpr.msg::%loop-value%} to coloured value "msg.%loop-value%" get of "plugins/Skript/scripts/%script%.yml"
-	set {skript.aip.version::tpr} to "1.0"
+	set {skript.aip.version::tpr} to "1.1"
 	set {tpr.api.conf::*} to configuration section "tpr" get of "plugins/Skript/scripts/%script%.yml"
 	loop {tpr.api.conf::*}:
 		set {tpr.conf::%loop-value%} to value "tpr.%loop-value%" get of "plugins/Skript/scripts/%script%.yml"
@@ -50,6 +50,22 @@ on load:
 	if {_chcekverstion} is not {skript.aip.version::tpr}:
 		send "&cWykryto nowa wersje &6Random Teleport - &c%{_chcekverstion}%" to console
 		send "&2Aby zaktualizowac skrypt wpisz &6/tpr update" to console
+	if {tpr.conf::chceked} is not set:
+		set {tpr.conf::chceked} to false
+	set {_chcek} to 0
+	loop {tpr.conf::*}:
+		if loop-index is "minx":
+			add 1 to {_chcek}
+		if loop-index is "maxx":
+			add 1 to {_chcek}
+		if loop-index is "miny":
+			add 1 to {_chcek}
+		if loop-index is "maxy":
+			add 1 to {_chcek}
+	if {_chcek} is 4:
+		set {tpr.conf::chceked} to true
+
+
 
 	
 
@@ -71,6 +87,9 @@ on join:
 
 command /tpr [<text>] [<text>]:
 	trigger:
+		if {tpr.conf::chceked} is false:
+			send "&c&LBlednie załadowany skrypt"
+			stop
 		if arg 1 is not set:
 			if player doesn't have permission "%{tpr.conf::prefixperm}%.use":
 				send "%{tpr.msg::noperm}%"
@@ -207,6 +226,10 @@ command /tpr [<text>] [<text>]:
 
 on sign change:
 	line 1 is "[teleport]" or "[Teleport]" or "[tp]" or "[Tp]":
+		if {tpr.conf::chceked} is false:
+			send "&c&LBlednie załadowany skrypt"
+			cancel event
+			stop
 		player doesn't have permission "%{tpr.conf::prefixperm}%.signs":
 			send "%{tpr.msg::noperm}%"
 			cancel event
@@ -217,6 +240,10 @@ on sign change:
 
 on right click on sign:
 	line 1 of clicked block is "&1[Teleport]":
+		if {tpr.conf::chceked} is false:
+			send "&c&LBlednie załadowany skrypt"
+			cancel event
+			stop
 		line 2 of clicked block is "losowy":
 			player doesn't have permission "%{tpr.conf::prefixperm}%.signs.use":
 				send "%{tpr.msg::noperm}%"
@@ -257,6 +284,10 @@ on right click on button or lever:
 			send "%{tpr.msg::noperm}%"
 			cancel event
 			stop
+		if {tpr.conf::chceked} is false:
+			send "&c&LBlednie załadowany skrypt"
+			cancel event
+			stop
 		set {_min.x} to {tpr.conf::minx} parsed as number
 		set {_max.x} to {tpr.conf::maxx} parsed as number
 		set {_min.y} to {tpr.conf::miny} parsed as number
@@ -288,6 +319,10 @@ on right click on button or lever:
 	if {tpr.%location of event-block%} is true:
 		player doesn't have permission "%{tpr.conf::prefixperm}%.button.use":
 			send "%{tpr.msg::noperm}%"
+			cancel event
+			stop
+		if {tpr.conf::chceked} is false:
+			send "&c&LBlednie załadowany skrypt"
 			cancel event
 			stop
 		set {_min.x} to {tpr.conf::minx} parsed as number
@@ -324,6 +359,10 @@ on pressure plate:
 			send "%{tpr.msg::noperm}%"
 			cancel event
 			stop
+		if {tpr.conf::chceked} is false:
+			send "&c&LBlednie załadowany skrypt"
+			cancel event
+			stop
 		set {_min.x} to {tpr.conf::minx} parsed as number
 		set {_max.x} to {tpr.conf::maxx} parsed as number
 		set {_min.y} to {tpr.conf::miny} parsed as number
@@ -355,6 +394,10 @@ on pressure plate:
 
 on place of button or lever:
 	if block behind event-block is sponge:
+		if {tpr.conf::chceked} is false:
+			send "&c&LBlednie załadowany skrypt"
+			cancel event
+			stop
 		player doesn't have permission "%{tpr.conf::prefixperm}%.create.tpr":
 			send "%{tpr.msg::noperm}%"
 			cancel event
