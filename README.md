@@ -1,6 +1,6 @@
 Random-Teleport
 ===============
 
-http://meee.pl/skrypty/random-teleport/
+http://meee.pl/skrypt/random-teleport
 0.5
-Wymagany dodatek wildskript http://www.dzikoysk.net/wildskript/
+Wymagany dodatek wildskript http://dev.bukkit.org/bukkit-plugins/wildskript/
